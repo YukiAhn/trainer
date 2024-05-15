@@ -1,7 +1,10 @@
 import pygame as pg
 import sys
 import random
+import time
 from panel import Panel
+from timer import Timer
+from button import Button
 
 pg.init()  # Инициализируем pygame
 
@@ -47,11 +50,22 @@ def get_random_element(level: int):
     return random.choice(data)
 
 
+timer = Timer("0", pg.Rect(width / 2, 50, 50, 50))
+mismatches = 0
+save_bnt = Button(pg.Rect(width / 2, 150, 50, 50), "pageforward.png", "pageforward-hover.png")
+
+
+def save_result():
+    with open("result.txt", 'wa') as file:
+        print(f"Вы прошли тренер за {time.time() - timer.tic:.2f} секунд, сделав {mismatches} ошибок", file=file)
+
+
 guessed_panel = Panel('-', pg.Rect(width - width_of_panel * 3, height - height_of_panel * 3, width_of_panel * 3, height_of_panel * 3))
 guessed_panel.state = 1
 guessed_panel.change_size(40)
 guessed = get_random_element(current_level)
 guessed_panel.change_text(guessed)
+
 
 while True:
     try:
@@ -60,6 +74,7 @@ while True:
             guessed = get_random_element(current_level)
             guessed_panel.change_text(guessed)
     except IndexError:
+        save_result()
         sys.exit(0)
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -76,6 +91,7 @@ while True:
                         if guessed == el.text:
                             el.state = 1
                         else:
+                            mismatches += 1
                             el.state = 2
                             answered.append(guessed)
                             for sub_el in row:
@@ -99,6 +115,8 @@ while True:
     for row in panels[:current_level + 1]:
         for el in row:
             el.draw(screen)
+        timer.draw(screen)
+        save_bnt.draw(screen)
     guessed_panel.draw(screen)
     pg.display.flip()
     screen.fill((60, 60, 80))
