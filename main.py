@@ -5,6 +5,7 @@ import time
 from panel import Panel
 from timer import Timer
 from button import Button
+import pickle
 
 pg.init()  # Инициализируем pygame
 
@@ -52,7 +53,9 @@ def get_random_element(level: int):
 
 timer = Timer("0", pg.Rect(width / 2, 50, 50, 50))
 mismatches = 0
-save_bnt = Button(pg.Rect(width / 2, 150, 50, 50), "pageforward.png", "pageforward-hover.png")
+
+load_bnt = Button(pg.Rect(width / 2 - 50, 150, 50, 50), "download.png", "download-hover.png")
+save_bnt = Button(pg.Rect(width / 2 + 50, 150, 50, 50), "save.png", "save-hover.png")
 
 
 def save_result():
@@ -69,6 +72,7 @@ guessed_panel.change_text(guessed)
 
 while True:
     try:
+        # noinspection PyInterpreter
         if guessed is None:
             current_level += 1
             guessed = get_random_element(current_level)
@@ -81,6 +85,34 @@ while True:
             pg.quit()
             sys.exit()
         if event.type == pg.MOUSEBUTTONDOWN:
+            if load_bnt.mouse_over():
+                try:
+                    with open('save.txt', 'r') as file:
+                        panels.clear()
+                        for i, row in enumerate(periodic_table):
+                            level = []
+                            for j, el in enumerate(row):
+                                if el is not None:
+                                    level.append(Panel(el,
+                                                       pg.Rect(
+                                                           j * width_of_panel, i * height_of_panel,
+                                                           width_of_panel, height_of_panel)
+                                                       )
+                                                 )
+                                    level[-1].state = int(file.readline())
+                            panels.append(level)
+                        current_level = int(file.readline())
+                        answered = list(map(lambda x: x[:-1], file.readlines()))
+                except Exception:
+                    pass
+            if save_bnt.mouse_over():
+                with open('save.txt', 'w') as file:
+                    for row in panels:
+                        for el in row:
+                            print(el.state, file=file)
+                    print(current_level, file=file)
+                    print(*answered, sep="\n", file=file)
+                    sys.exit(0)
             for row in panels[:current_level + 1]:
                 for el in row:
                     if el.mouse_over() and el.text not in answered:
@@ -117,6 +149,7 @@ while True:
             el.draw(screen)
         timer.draw(screen)
         save_bnt.draw(screen)
+        load_bnt.draw(screen)
     guessed_panel.draw(screen)
     pg.display.flip()
     screen.fill((60, 60, 80))

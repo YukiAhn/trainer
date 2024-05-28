@@ -7,7 +7,7 @@ class Timer:
         self.text = title
         self.rect: pg.Rect = rect
         self.tic = time.time()
-        self.font = "SourceSansPro-Regular.ttf"
+        self.font = pg.font.get_default_font()
         self.size = 40
         self.color = pg.Color((255, 0, 0))
         self._config_font()

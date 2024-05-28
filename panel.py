@@ -6,7 +6,7 @@ class Panel:
         self.text = title
         self.rect: pg.Rect = rect
         self.state = 0  # 0 - сокрыто, 1 - правильно, 2 - неправильно
-        self.font = "SourceSansPro-Regular.ttf"
+        self.font = pg.font.get_default_font()
         self.size = 20
         self.color = pg.Color((0, 0, 0))
         self._config_font()
